@@ -14,6 +14,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,9 +33,12 @@ public class UserServiceImp implements UserService, UserDetailsService {
   @Autowired
   private RoleRepository roleRepository;
 
+  private final PasswordEncoder passwordEncoder;
+
   @Override
   public User saveUser(User user) {
     log.info("Saving new user {} to the database", user.getUsername());
+    user.setPassword(passwordEncoder.encode(user.getPassword()));
     return this.userRepository.save(user);
   }
 
