@@ -1,8 +1,15 @@
 package com.plg.springsecurity.security;
 
+import java.lang.invoke.VarHandle.AccessMode;
+
+import javax.swing.text.html.FormSubmitEvent;
+import javax.swing.text.html.FormSubmitEvent.MethodType;
+
 import com.plg.springsecurity.filter.CustomAuthentificationFilter;
 
+import org.aspectj.weaver.tools.PointcutPrimitive;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -29,10 +36,16 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
   @Override
   protected void configure(HttpSecurity http) throws Exception {
+    CustomAuthentificationFilter customAuthentificationFilter = new CustomAuthentificationFilter(
+        authenticationManager());
+    customAuthentificationFilter.setFilterProcessesUrl("/api/login");
     http.csrf().disable();
     http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-    http.authorizeRequests().anyRequest().permitAll();
-    http.addFilter(new CustomAuthentificationFilter(authenticationManager()));
+    http.authorizeRequests().antMatchers("/api/login/**").permitAll();
+    http.authorizeRequests().antMatchers(HttpMethod.GET, "/api/user/**").hasAnyAuthority("ROLE_USER");
+    http.authorizeRequests().antMatchers(HttpMethod.GET, "/api/user/save/**").hasAnyAuthority("ROLE_ADMIN");
+    http.authorizeRequests().anyRequest().authenticated();
+    http.addFilter(customAuthentificationFilter);
   }
 
   @Override

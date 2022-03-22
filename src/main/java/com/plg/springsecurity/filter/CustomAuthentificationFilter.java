@@ -2,6 +2,8 @@ package com.plg.springsecurity.filter;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
@@ -12,7 +14,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -64,7 +68,13 @@ public class CustomAuthentificationFilter extends UsernamePasswordAuthentication
         .withIssuer(request.getRequestURL().toString())
         .sign(algorithm);
 
-    response.setHeader("accessToken", accessToken);
-    response.setHeader("refreshToken", refreshToken);
+    // response.setHeader("accessToken", accessToken);
+    // response.setHeader("refreshToken", refreshToken);
+
+    Map<String, String> headerTokens = new HashMap<>();
+    headerTokens.put("access_token", accessToken);
+    headerTokens.put("refresh_token", refreshToken);
+    response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+    new ObjectMapper().writeValue(response.getOutputStream(), headerTokens);
   }
 }
