@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -14,11 +16,19 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class CustomAuthorizationFilter extends OncePerRequestFilter {
 
   @Override
@@ -29,7 +39,6 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
     } else {
       String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
       if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-
         try {
           String token = authorizationHeader.substring("Bearer ".length());
           Algorithm algorithm = Algorithm.HMAC256("secret".getBytes());
@@ -41,10 +50,23 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
           Arrays.stream(roles).forEach(role -> {
             authorities.add(new SimpleGrantedAuthority(role));
           });
-          UsernamePasswordAuthentificationToken
+          UsernamePasswordAuthenticationToken autehenticationToken = new UsernamePasswordAuthenticationToken(username,
+              null, authorities);
+          SecurityContextHolder.getContext().setAuthentication(autehenticationToken);
+          filterChain.doFilter(request, response);
         } catch (Exception e) {
+          log.info("Error login in : {}", e.getMessage());
+          response.setHeader("Error", e.getMessage());
+          response.setStatus(HttpStatus.FORBIDDEN.value());
+          // response.sendError(HttpStatus.FORBIDDEN.value());
 
+          Map<String, String> error = new HashMap<>();
+          error.put("access_token", e.getMessage());
+          response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+          new ObjectMapper().writeValue(response.getOutputStream(), error);
         }
+      } else {
+        filterChain.doFilter(request, response);
       }
     }
   }

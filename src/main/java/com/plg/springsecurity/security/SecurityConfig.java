@@ -6,11 +6,14 @@ import javax.swing.text.html.FormSubmitEvent;
 import javax.swing.text.html.FormSubmitEvent.MethodType;
 
 import com.plg.springsecurity.filter.CustomAuthentificationFilter;
+import com.plg.springsecurity.filter.CustomAuthorizationFilter;
 
 import org.aspectj.weaver.tools.PointcutPrimitive;
+import org.springframework.boot.autoconfigure.security.SecurityProperties.Filter;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -46,6 +49,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     http.authorizeRequests().antMatchers(HttpMethod.GET, "/api/user/save/**").hasAnyAuthority("ROLE_ADMIN");
     http.authorizeRequests().anyRequest().authenticated();
     http.addFilter(customAuthentificationFilter);
+    http.addFilterBefore(new CustomAuthorizationFilter(), UsernamePasswordAuthenticationToken.class);
   }
 
   @Override
