@@ -54,11 +54,12 @@ public class CustomAuthentificationFilter extends UsernamePasswordAuthentication
       Authentication authentication) throws IOException, ServletException {
     User user = (User) authentication.getPrincipal();
     Algorithm algorithm = Algorithm.HMAC256("secret".getBytes());
+    
     String accessToken = JWT.create()
         .withSubject(user.getUsername())
         .withExpiresAt(new Date(System.currentTimeMillis() * 10 * 60 * 1000))
         .withIssuer(request.getRequestURL().toString())
-        .withClaim("role",
+        .withClaim("roles",
             user.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
         .sign(algorithm);
 

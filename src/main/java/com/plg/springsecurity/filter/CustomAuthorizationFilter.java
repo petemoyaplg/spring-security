@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -34,7 +35,7 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
   @Override
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
       throws ServletException, IOException {
-    if (request.getServletPath().equals("/api/login")) {
+    if (request.getServletPath().equals("/api/login") || request.getServletPath().equals("token/refresh/**")) {
       filterChain.doFilter(request, response);
     } else {
       String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
@@ -42,10 +43,13 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
         try {
           String token = authorizationHeader.substring("Bearer ".length());
           Algorithm algorithm = Algorithm.HMAC256("secret".getBytes());
-          JWTVerifier jwtVerifier = JWT.require(algorithm).build();
-          DecodedJWT decodedJWT = jwtVerifier.verify(token);
+          JWTVerifier verifier = JWT.require(algorithm).build();
+          DecodedJWT decodedJWT = verifier.verify(token);
           String username = decodedJWT.getSubject();
-          String[] roles = decodedJWT.getClaim("roles").asArray(String.class);
+
+          Map<String, Claim> claims = decodedJWT.getClaims();
+          Claim claim = claims.get("roles");
+          String[] roles = claim.asArray(String.class);
           Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
           Arrays.stream(roles).forEach(role -> {
             authorities.add(new SimpleGrantedAuthority(role));

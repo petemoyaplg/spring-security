@@ -34,7 +34,7 @@ public class SpringSecurityApplication {
 			userService.saveRole(new Role(null, "ROLE_SUPER_ADMIN"));
 
 			userService.saveUser(new User(null, "John Travolta", "john", "1234", new ArrayList<>()));
-			userService.saveUser(new User(null, "Zill S;ith", "will", "1234", new ArrayList<>()));
+			userService.saveUser(new User(null, "Zill Smith", "will", "1234", new ArrayList<>()));
 			userService.saveUser(new User(null, "Jim Carry", "jim", "1234", new ArrayList<>()));
 			userService.saveUser(new User(null, "Arnold Swchwarzenegger", "arnold", "1234", new ArrayList<>()));
 			userService.saveUser(new User(null, "Kevin Arte", "kevin", "1234", new ArrayList<>()));
@@ -48,6 +48,7 @@ public class SpringSecurityApplication {
 			userService.addRoleToUser("kevin", "ROLE_USER");
 			userService.addRoleToUser("kevin", "ROLE_ADMIN");
 			userService.addRoleToUser("eva", "ROLE_USER");
+			userService.addRoleToUser("eva", "ROLE_MANAGER");
 			userService.addRoleToUser("eva", "ROLE_SUPER_ADMIN");
 
 		};

@@ -2,6 +2,7 @@ package com.plg.springsecurity.security;
 
 import java.lang.invoke.VarHandle.AccessMode;
 
+import javax.servlet.Filter;
 import javax.swing.text.html.FormSubmitEvent;
 import javax.swing.text.html.FormSubmitEvent.MethodType;
 
@@ -9,7 +10,7 @@ import com.plg.springsecurity.filter.CustomAuthentificationFilter;
 import com.plg.springsecurity.filter.CustomAuthorizationFilter;
 
 import org.aspectj.weaver.tools.PointcutPrimitive;
-import org.springframework.boot.autoconfigure.security.SecurityProperties.Filter;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -23,6 +24,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -44,14 +46,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     customAuthentificationFilter.setFilterProcessesUrl("/api/login");
     http.csrf().disable();
     http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-    http.authorizeRequests().antMatchers("/api/login/**").permitAll();
+    http.authorizeRequests().antMatchers("/api/login/**", "token/refresh/**").permitAll();
     http.authorizeRequests().antMatchers(HttpMethod.GET, "/api/user/**").hasAnyAuthority("ROLE_USER");
     http.authorizeRequests().antMatchers(HttpMethod.GET, "/api/user/save/**").hasAnyAuthority("ROLE_ADMIN");
     http.authorizeRequests().anyRequest().authenticated();
     http.addFilter(customAuthentificationFilter);
-    http.addFilterBefore(new CustomAuthorizationFilter(), UsernamePasswordAuthenticationToken.class);
+    http.addFilterBefore(new CustomAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
   }
 
+  @Bean
   @Override
   protected AuthenticationManager authenticationManager() throws Exception {
     return super.authenticationManager();
