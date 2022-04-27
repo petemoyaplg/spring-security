@@ -2,6 +2,8 @@ package com.plg.springsecurity.models;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -26,5 +28,5 @@ public class User {
   private String username;
   private String password;
   @ManyToMany(fetch = FetchType.EAGER)
-  private Collection<Role> roles = new ArrayList<>();
+  private Set<Role> roles = new HashSet<>();
 }

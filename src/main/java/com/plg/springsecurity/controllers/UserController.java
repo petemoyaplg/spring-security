@@ -15,12 +15,16 @@ import com.plg.springsecurity.models.User;
 import com.plg.springsecurity.services.UserServiceImp;
 
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -40,16 +44,29 @@ import javax.servlet.http.HttpServletResponse;
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
+@Slf4j
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class UserController {
   @Autowired
   private UserServiceImp userServiceImp;
+
+  @GetMapping()
+  public String welcome() {
+    return "Welcom";
+  }
 
   @GetMapping("users")
   public ResponseEntity<List<User>> getUsers() {
     return ResponseEntity.ok().body(userServiceImp.getUsers());
   }
 
-  @PostMapping("users/save")
+  @GetMapping("roles")
+  @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+  public ResponseEntity<List<Role>> getRoles() {
+    return ResponseEntity.ok().body(userServiceImp.getRoles());
+  }
+
+  @PostMapping("user/save")
   public ResponseEntity<User> saveUser(@RequestBody User user) {
     URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("api/user/save").toUriString());
     return ResponseEntity.created(uri).body(userServiceImp.saveUser(user));
@@ -82,7 +99,7 @@ public class UserController {
 
         String accessToken = JWT.create()
             .withSubject(user.getUsername())
-            .withExpiresAt(new Date(System.currentTimeMillis() * 10 * 60 * 1000))
+            .withExpiresAt(new Date(System.currentTimeMillis() * 1 * 60 * 1000))
             .withIssuer(request.getRequestURL().toString())
             .withClaim("roles", user.getRoles().stream().map(Role::getName).collect(Collectors.toList()))
             .sign(algorithm);
@@ -93,7 +110,7 @@ public class UserController {
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         new ObjectMapper().writeValue(response.getOutputStream(), headerTokens);
       } catch (Exception e) {
-        // log.info("Error login in : {}", e.getMessage());
+        log.info("Error login in : {}", e.getMessage());
         response.setHeader("Error", e.getMessage());
         response.setStatus(HttpStatus.FORBIDDEN.value());
         // response.sendError(HttpStatus.FORBIDDEN.value());

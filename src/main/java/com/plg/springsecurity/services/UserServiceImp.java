@@ -54,6 +54,8 @@ public class UserServiceImp implements UserService, UserDetailsService {
     User user = this.userRepository.findByUsername(username);
     Role role = this.roleRepository.findByName(roleName);
     user.getRoles().add(role);
+    this.userRepository.save(user);
+    log.debug("user updated");
   }
 
   @Override
@@ -66,6 +68,12 @@ public class UserServiceImp implements UserService, UserDetailsService {
   public List<User> getUsers() {
     log.info("Fetching all users");
     return this.userRepository.findAll();
+  }
+
+  @Override
+  public List<Role> getRoles() {
+    log.info("Fetching user all roles");
+    return this.roleRepository.findAll();
   }
 
   @Override

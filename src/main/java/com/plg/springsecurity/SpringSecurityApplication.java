@@ -1,6 +1,7 @@
 package com.plg.springsecurity;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 import com.plg.springsecurity.models.Role;
 import com.plg.springsecurity.models.User;
@@ -33,12 +34,12 @@ public class SpringSecurityApplication {
 			userService.saveRole(new Role(null, "ROLE_ADMIN"));
 			userService.saveRole(new Role(null, "ROLE_SUPER_ADMIN"));
 
-			userService.saveUser(new User(null, "John Travolta", "john", "1234", new ArrayList<>()));
-			userService.saveUser(new User(null, "Zill Smith", "will", "1234", new ArrayList<>()));
-			userService.saveUser(new User(null, "Jim Carry", "jim", "1234", new ArrayList<>()));
-			userService.saveUser(new User(null, "Arnold Swchwarzenegger", "arnold", "1234", new ArrayList<>()));
-			userService.saveUser(new User(null, "Kevin Arte", "kevin", "1234", new ArrayList<>()));
-			userService.saveUser(new User(null, "Eva Longoria", "eva", "1234", new ArrayList<>()));
+			userService.saveUser(new User(null, "John Travolta", "john", "1234", new HashSet<>()));
+			userService.saveUser(new User(null, "Zill Smith", "will", "1234", new HashSet<>()));
+			userService.saveUser(new User(null, "Jim Carry", "jim", "1234", new HashSet<>()));
+			userService.saveUser(new User(null, "Arnold Swchwarzenegger", "arnold", "1234", new HashSet<>()));
+			userService.saveUser(new User(null, "Kevin Arte", "kevin", "1234", new HashSet<>()));
+			userService.saveUser(new User(null, "Eva Longoria", "eva", "1234", new HashSet<>()));
 
 			userService.addRoleToUser("john", "ROLE_USER");
 			userService.addRoleToUser("will", "ROLE_USER");
